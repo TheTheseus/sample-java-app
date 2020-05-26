@@ -1,0 +1,36 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+env:
+  USERNAME: ${{ secrets.USERNAME }}
+  TOKEN: ${{ secrets.API_TOKEN }}
+  PCR_URL: ${{ secrets.OC_DOCKER_REGISTORY }}
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v1.1.0
+      with:
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.API_TOKEN }}
+        registry: ${{ secrets.OC_DOCKER_REGISTORY }}
+        dockerfile: Dockerfile
+        repository: poc-project/aj-test-app
+        tags: latest
+        push: true
+    - name: OpenShift Action
+      uses: redhat-developer/openshift-actions@v1.1
+      with:
+        version: 'latest'
+        openshift_server_url: ${{ secrets.OPENSHIFT_SERVER_URL }}
+        parameters: '{"apitoken": "${{ secrets.API_TOKEN }}", "acceptUntrustedCerts": "true"}'
+        cmd: |          
+          'version'
+          'docker images'

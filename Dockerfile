@@ -1,4 +1,4 @@
-FROM FROM alpine/git as BUILD
+FROM alpine/git
  
 COPY src /usr/src/app/src
 COPY pom.xml /usr/src/app
